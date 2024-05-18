@@ -13,11 +13,16 @@ function encryptText() {
   let ciphertext = '';
   for (let i = 0; i < plaintext.length; i++) {
     const char = plaintext[i];
-    const word = plaintext.substr(i, 3); // 3文字ずつチェック
-    if (specialWords[word]) {
-      ciphertext += specialWords[word];
-      i += 2; // 次の3文字に進む
-    } else {
+    let word = '';
+    for (let j = 0; j < 9 && i + j < plaintext.length; j++) {
+      word += plaintext[i + j];
+      if (specialWords[word]) {
+        ciphertext += specialWords[word];
+        i += j;
+        break;
+      }
+    }
+    if (!word) {
       ciphertext += substitutionTable[char] || char;
     }
   }
@@ -27,15 +32,27 @@ function encryptText() {
 function decryptText() {
   const ciphertext = document.getElementById("ciphertext").value;
   let plaintext = '';
-  for (let i = 0; i < ciphertext.length; i += 3) {
-    const chunk = ciphertext.substr(i, 3);
-    const word = ciphertext.substr(i, 9); // 9文字ずつチェック
-    if (specialWords[word]) {
-      plaintext += specialWords[word];
-      i += 8; // 次の3文字に進む
-    } else {
-      plaintext += substitutionTable[chunk] || chunk;
+  for (let i = 0; i < ciphertext.length; i++) {
+    const char = ciphertext[i];
+    let chunk = '';
+    for (let j = 0; j < 9 && i + j < ciphertext.length; j++) {
+      chunk += ciphertext[i + j];
+      if (specialWords[chunk]) {
+        plaintext += specialWords[chunk];
+        i += j;
+        break;
+      }
+    }
+    if (!chunk) {
+      chunk = ciphertext.substr(i, 3);
+      plaintext += substitutionTable[chunk] || char;
     }
   }
   document.getElementById("plaintext").value = plaintext;
+}
+
+function copyText() {
+  const ciphertext = document.getElementById("ciphertext").value;
+  navigator.clipboard.writeText(ciphertext);
+  alert("暗号文がコピーされました");
 }
